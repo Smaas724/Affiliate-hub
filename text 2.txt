@@ -1,0 +1,591 @@
+// Subscription Model Framework for AffiliateHub - Enhanced Version
+
+// Subscription tiers configuration
+const subscriptionTiers = {
+    free: {
+        name: 'Free',
+        price: 0,
+        maxLinks: 25,
+        features: [
+            'Basic access to all networks',
+            'Manual link sharing',
+            'Basic analytics',
+            'Limited product discovery'
+        ]
+    },
+    premium: {
+        name: 'Premium',
+        price: 9.99,
+        maxLinks: Infinity,
+        features: [
+            'Unlimited affiliate links',
+            'Advanced analytics and reporting',
+            'Automated posting schedules',
+            'Priority support',
+            'Content creation tools'
+        ]
+    },
+    pro: {
+        name: 'Pro',
+        price: 19.99,
+        maxLinks: Infinity,
+        features: [
+            'All Premium features',
+            'AI-powered product recommendations',
+            'Conversion optimization tools',
+            'White-label link options',
+            'Team collaboration features'
+        ]
+    },
+    billingCycles: {
+        monthly: {
+            premium: 9.99,
+            pro: 19.99
+        },
+        yearly: {
+            premium: 99.99, // 20% discount
+            pro: 199.99    // 20% discount
+        }
+    }
+};
+
+// User subscription state
+let userSubscription = {
+    tier: 'free',
+    startDate: null,
+    endDate: null,
+    nextBillingDate: null,
+    paymentMethod: null,
+    autoRenew: false,
+    billingCycle: 'monthly',
+    status: 'active'
+};
+
+// Initialize subscription module
+function initSubscription() {
+    // Load subscription data from localStorage
+    const savedSubscription = localStorage.getItem('userSubscription');
+    if (savedSubscription) {
+        userSubscription = JSON.parse(savedSubscription);
+    }
+    
+    // Update UI based on subscription
+    updateSubscriptionUI();
+    
+    // Add event listeners for subscription-related buttons
+    setupSubscriptionEvents();
+}
+
+// Update UI elements based on subscription tier
+function updateSubscriptionUI() {
+    // Update plan badge
+    const planBadge = document.querySelector('.plan-badge');
+    if (planBadge) {
+        planBadge.textContent = subscriptionTiers[userSubscription.tier].name;
+        planBadge.className = 'plan-badge ' + userSubscription.tier;
+    }
+    
+    // Update links usage display
+    const linksUsed = affiliateLinks.length;
+    const maxLinks = subscriptionTiers[userSubscription.tier].maxLinks;
+    const linksDisplay = document.querySelector('.subscription-info span');
+    
+    if (linksDisplay) {
+        if (maxLinks === Infinity) {
+            linksDisplay.textContent = `${linksUsed}/Unlimited used`;
+        } else {
+            linksDisplay.textContent = `${linksUsed}/${maxLinks} used`;
+        }
+    }
+    
+    // Update upgrade button
+    const upgradeBtn = document.querySelector('.upgrade-btn');
+    if (upgradeBtn) {
+        if (userSubscription.tier === 'free') {
+            upgradeBtn.textContent = 'Upgrade to Premium';
+            upgradeBtn.style.display = 'block';
+        } else if (userSubscription.tier === 'premium') {
+            upgradeBtn.textContent = 'Upgrade to Pro';
+            upgradeBtn.style.display = 'block';
+        } else {
+            upgradeBtn.style.display = 'none';
+        }
+    }
+    
+    // Update manage subscription button
+    const manageBtn = document.querySelector('.manage-subscription-btn');
+    if (manageBtn) {
+        if (userSubscription.tier !== 'free') {
+            manageBtn.style.display = 'block';
+        } else {
+            manageBtn.style.display = 'none';
+        }
+    }
+    
+    // Apply feature restrictions based on tier
+    applyTierRestrictions();
+}
+
+// Set up event listeners for subscription-related elements
+function setupSubscriptionEvents() {
+    // Upgrade button
+    const upgradeBtn = document.querySelector('.upgrade-btn');
+    if (upgradeBtn) {
+        upgradeBtn.addEventListener('click', function() {
+            showUpgradeModal();
+        });
+    }
+    
+    // Manage subscription button
+    const manageBtn = document.querySelector('.manage-subscription-btn');
+    if (manageBtn) {
+        manageBtn.addEventListener('click', function() {
+            showSubscriptionDetails();
+        });
+    }
+}
+
+// Show the upgrade subscription modal
+function showUpgradeModal() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('upgrade-modal')) {
+        createUpgradeModal();
+    }
+    
+    // Determine which tier to show
+    const targetTier = userSubscription.tier === 'free' ? 'premium' : 'pro';
+    
+    // Update modal content
+    updateUpgradeModalContent(targetTier);
+    
+    // Show the modal
+    document.getElementById('upgrade-modal').classList.add('active');
+}
+
+// Create the upgrade modal HTML
+function createUpgradeModal() {
+    const modalHTML = `
+    <div class="modal" id="upgrade-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upgrade Your Subscription</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="payment-errors" class="error-message" style="display: none;"></div>
+                
+                <div class="billing-toggle">
+                    <div class="toggle-option monthly active" data-cycle="monthly">Monthly</div>
+                    <div class="toggle-option yearly" data-cycle="yearly">Yearly (Save 20%)</div>
+                </div>
+                
+                <div class="tier-details">
+                    <h3>Premium Tier</h3>
+                    <div class="price">$9.99<span>/month</span></div>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Unlimited affiliate links</li>
+                        <li><i class="fas fa-check"></i> Advanced analytics and reporting</li>
+                        <li><i class="fas fa-check"></i> Automated posting schedules</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                        <li><i class="fas fa-check"></i> Content creation tools</li>
+                    </ul>
+                </div>
+                <div class="payment-form">
+                    <h3>Payment Information</h3>
+                    <div class="form-group">
+                        <label for="card-name">Name on Card</label>
+                        <input type="text" id="card-name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="card-number">Card Number</label>
+                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="card-expiry">Expiry Date</label>
+                            <input type="text" id="card-expiry" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="card-cvc">CVC</label>
+                            <input type="text" id="card-cvc" placeholder="123" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="auto-renew" checked>
+                            Auto-renew subscription
+                        </label>
+                    </div>
+                    <button type="button" class="btn primary process-payment-btn">Upgrade Now</button>
+                </div>
+                <div class="payment-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Upgrade Successful!</h3>
+                    <p>Your subscription has been upgraded. Enjoy your new features!</p>
+                    <button class="btn primary close-success-btn">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    // Add the modal to the document
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    document.querySelector('#upgrade-modal .close-modal').addEventListener('click', function() {
+        document.getElementById('upgrade-modal').classList.remove('active');
+    });
+    
+    document.querySelector('.process-payment-btn').addEventListener('click', function() {
+        if (validatePaymentForm()) {
+            processPayment();
+        }
+    });
+    
+    document.querySelector('.close-success-btn').addEventListener('click', function() {
+        document.getElementById('upgrade-modal').classList.remove('active');
+        updateSubscriptionUI();
+    });
+    
+    // Billing cycle toggle
+    document.querySelectorAll('.billing-toggle .toggle-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.billing-toggle .toggle-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            this.classList.add('active');
+            updateBillingCycle(this.dataset.cycle);
+        });
+    });
+}
+
+// Update billing cycle display
+function updateBillingCycle(cycle) {
+    const tier = userSubscription.tier === 'free' ? 'premium' : 'pro';
+    const priceElement = document.querySelector('#upgrade-modal .price');
+    
+    if (priceElement) {
+        const price = subscriptionTiers.billingCycles[cycle][tier];
+        const period = cycle === 'monthly' ? '/month' : '/year';
+        priceElement.innerHTML = `$${price}<span>${period}</span>`;
+    }
+}
+
+// Validate payment form
+function validatePaymentForm() {
+    const cardName = document.getElementById('card-name').value.trim();
+    const cardNumber = document.getElementById('card-number').value.trim();
+    const cardExpiry = document.getElementById('card-expiry').value.trim();
+    const cardCvc = document.getElementById('card-cvc').value.trim();
+    const errorElement = document.getElementById('payment-errors');
+    
+    // Reset error display
+    errorElement.style.display = 'none';
+    errorElement.textContent = '';
+    
+    // Basic validation
+    if (!cardName || !cardNumber || !cardExpiry || !cardCvc) {
+        showError('Please fill in all payment fields');
+        return false;
+    }
+    
+    // Validate card number (simple check)
+    if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ''))) {
+        showError('Please enter a valid 16-digit card number');
+        return false;
+    }
+    
+    // Validate expiry date
+    if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+        showError('Please enter expiry date in MM/YY format');
+        return false;
+    }
+    
+    // Validate CVC
+    if (!/^\d{3,4}$/.test(cardCvc)) {
+        showError('Please enter a valid 3 or 4 digit CVC');
+        return false;
+    }
+    
+    return true;
+}
+
+function showError(message) {
+    const errorElement = document.getElementById('payment-errors');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+// Process the payment and upgrade the subscription
+function processPayment() {
+    // Show loading state
+    const paymentBtn = document.querySelector('.process-payment-btn');
+    paymentBtn.textContent = 'Processing...';
+    paymentBtn.disabled = true;
+    
+    // Get selected billing cycle
+    const billingCycle = document.querySelector('.billing-toggle .toggle-option.active').dataset.cycle;
+    
+    // Simulate payment processing (2 seconds)
+    setTimeout(() => {
+        // Determine the new tier
+        const newTier = userSubscription.tier === 'free' ? 'premium' : 'pro';
+        
+        // Calculate dates
+        const now = new Date();
+        const startDate = now.toISOString();
+        let endDate = new Date(now);
+        
+        if (billingCycle === 'yearly') {
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        } else {
+            endDate.setMonth(endDate.getMonth() + 1);
+        }
+        
+        // Update subscription
+        userSubscription = {
+            tier: newTier,
+            startDate: startDate,
+            endDate: endDate.toISOString(),
+            nextBillingDate: endDate.toISOString(),
+            paymentMethod: 'credit_card',
+            autoRenew: document.getElementById('auto-renew').checked,
+            billingCycle: billingCycle,
+            status: 'active'
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('userSubscription', JSON.stringify(userSubscription));
+        
+        // Update UI
+        updateSubscriptionUI();
+        
+        // Show success message
+        document.querySelector('.payment-form').style.display = 'none';
+        document.querySelector('.payment-success').style.display = 'block';
+        
+        // Reset button
+        paymentBtn.textContent = 'Upgrade Now';
+        paymentBtn.disabled = false;
+    }, 2000);
+}
+
+// Show subscription details modal
+function showSubscriptionDetails() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('subscription-details-modal')) {
+        createSubscriptionDetailsModal();
+    }
+    
+    // Update modal content with current subscription details
+    updateSubscriptionDetailsContent();
+    
+    // Show the modal
+    document.getElementById('subscription-details-modal').classList.add('active');
+}
+
+// Create subscription details modal
+function createSubscriptionDetailsModal() {
+    const modalHTML = `
+    <div class="modal" id="subscription-details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Subscription Details</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="subscription-status">
+                    <h3>Current Plan: <span class="plan-badge">${userSubscription.tier}</span></h3>
+                    <p>Status: <span class="status-badge">${userSubscription.status}</span></p>
+                    <p>Billing Cycle: <span class="billing-cycle">${userSubscription.billingCycle}</span></p>
+                    <p>Next Billing Date: <span class="next-billing-date">${userSubscription.nextBillingDate ? new Date(userSubscription.nextBillingDate).toLocaleDateString() : 'N/A'}</span></p>
+                    <p>Payment Method: <span class="payment-method">${userSubscription.paymentMethod || 'N/A'}</span></p>
+                </div>
+                
+                <div class="subscription-actions">
+                    <button class="btn secondary change-plan-btn">Change Plan</button>
+                    <button class="btn danger cancel-subscription-btn">Cancel Subscription</button>
+                    <button class="btn primary update-payment-btn">Update Payment Method</button>
+                </div>
+                
+                <div class="billing-history">
+                    <h3>Billing History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Plan</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody class="billing-history-body">
+                            <!-- Will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    // Add the modal to the document
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    document.querySelector('#subscription-details-modal .close-modal').addEventListener('click', function() {
+        document.getElementById('subscription-details-modal').classList.remove('active');
+    });
+    
+    document.querySelector('.cancel-subscription-btn').addEventListener('click', cancelSubscription);
+    document.querySelector('.change-plan-btn').addEventListener('click', showUpgradeModal);
+}
+
+// Update subscription details content
+function updateSubscriptionDetailsContent() {
+    const modal = document.getElementById('subscription-details-modal');
+    if (!modal) return;
+    
+    // Update basic info
+    modal.querySelector('.plan-badge').textContent = subscriptionTiers[userSubscription.tier].name;
+    modal.querySelector('.plan-badge').className = 'plan-badge ' + userSubscription.tier;
+    
+    // Update status badge
+    const statusBadge = modal.querySelector('.status-badge');
+    statusBadge.textContent = userSubscription.status;
+    statusBadge.className = 'status-badge ' + (userSubscription.status === 'active' ? 'active' : 'inactive');
+    
+    // Update other fields
+    modal.querySelector('.billing-cycle').textContent = userSubscription.billingCycle;
+    modal.querySelector('.next-billing-date').textContent = userSubscription.nextBillingDate ? 
+        new Date(userSubscription.nextBillingDate).toLocaleDateString() : 'N/A';
+    modal.querySelector('.payment-method').textContent = userSubscription.paymentMethod || 'N/A';
+    
+    // Update billing history (simplified for demo)
+    const billingHistoryBody = modal.querySelector('.billing-history-body');
+    if (billingHistoryBody) {
+        billingHistoryBody.innerHTML = `
+            <tr>
+                <td>${userSubscription.startDate ? new Date(userSubscription.startDate).toLocaleDateString() : 'N/A'}</td>
+                <td>$${subscriptionTiers.billingCycles[userSubscription.billingCycle][userSubscription.tier]}</td>
+                <td>${subscriptionTiers[userSubscription.tier].name}</td>
+                <td><a href="#" class="receipt-link">View</a></td>
+            </tr>
+        `;
+    }
+}
+
+// Cancel subscription
+function cancelSubscription() {
+    if (confirm('Are you sure you want to cancel your subscription?')) {
+        userSubscription.status = 'cancelled';
+        userSubscription.endDate = userSubscription.nextBillingDate;
+        localStorage.setItem('userSubscription', JSON.stringify(userSubscription));
+        
+        updateSubscriptionUI();
+        updateSubscriptionDetailsContent();
+        alert('Your subscription has been cancelled. You will retain access until ' + 
+            new Date(userSubscription.endDate).toLocaleDateString());
+    }
+}
+
+// Apply feature restrictions based on subscription tier
+function applyTierRestrictions() {
+    const tier = userSubscription.tier;
+    const maxLinks = subscriptionTiers[tier].maxLinks;
+    
+    // Check if user has reached link limit
+    if (affiliateLinks.length >= maxLinks && maxLinks !== Infinity) {
+        // Disable link creation buttons
+        const createLinkBtns = [
+            document.getElementById('create-link-btn'),
+            document.getElementById('new-link-btn'),
+            document.getElementById('create-first-link')
+        ];
+        
+        createLinkBtns.forEach(btn => {
+            if (btn) btn.disabled = true;
+        });
+        
+        // Show upgrade message
+        if (!document.querySelector('.link-limit-warning')) {
+            const warning = document.createElement('div');
+            warning.className = 'link-limit-warning';
+            warning.innerHTML = `
+                <p>You've reached your limit of ${maxLinks} links on the ${subscriptionTiers[tier].name} plan.</p>
+                <button class="btn primary upgrade-from-warning-btn">Upgrade Now</button>
+            `;
+            
+            const sectionHeader = document.querySelector('#links .section-header');
+            if (sectionHeader) {
+                sectionHeader.appendChild(warning);
+                
+                // Add event listener to the new button
+                document.querySelector('.upgrade-from-warning-btn').addEventListener('click', function() {
+                    showUpgradeModal();
+                });
+            }
+        }
+    } else {
+        // Enable link creation buttons
+        const createLinkBtns = [
+            document.getElementById('create-link-btn'),
+            document.getElementById('new-link-btn'),
+            document.getElementById('create-first-link')
+        ];
+        
+        createLinkBtns.forEach(btn => {
+            if (btn) btn.disabled = false;
+        });
+        
+        // Remove warning if it exists
+        const warning = document.querySelector('.link-limit-warning');
+        if (warning) {
+            warning.remove();
+        }
+    }
+    
+    // Apply other tier-specific restrictions
+    if (tier === 'free') {
+        // Disable premium features
+        document.querySelectorAll('.premium-feature').forEach(el => {
+            el.classList.add('disabled');
+            el.setAttribute('data-tooltip', 'Upgrade to Premium to unlock this feature');
+        });
+    } else {
+        // Enable premium features
+        document.querySelectorAll('.premium-feature').forEach(el => {
+            el.classList.remove('disabled');
+            el.removeAttribute('data-tooltip');
+        });
+        
+        // Handle pro-only features
+        if (tier !== 'pro') {
+            document.querySelectorAll('.pro-feature').forEach(el => {
+                el.classList.add('disabled');
+                el.setAttribute('data-tooltip', 'Upgrade to Pro to unlock this feature');
+            });
+        } else {
+            document.querySelectorAll('.pro-feature').forEach(el => {
+                el.classList.remove('disabled');
+                el.removeAttribute('data-tooltip');
+            });
+        }
+    }
+}
+
+// Add subscription initialization to the main init function
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the application
+    initApp();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Load any saved data
+    loadSavedData();
+    
+    // Initialize subscription module
+    initSubscription();
+});

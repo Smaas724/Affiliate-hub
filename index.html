@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AffiliateHub - Easy Affiliate Marketing Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1><i class="fas fa-link"></i> AffiliateHub</h1>
+                <p>Your All-in-One Affiliate Marketing Tool</p>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+                    <li data-tab="products"><i class="fas fa-shopping-cart"></i> Products</li>
+                    <li data-tab="links"><i class="fas fa-link"></i> My Links</li>
+                    <li data-tab="analytics"><i class="fas fa-chart-line"></i> Analytics</li>
+                    <li data-tab="settings"><i class="fas fa-cog"></i> Settings</li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <div class="welcome-card">
+                    <h2>Welcome to AffiliateHub!</h2>
+                    <p>Your all-in-one tool for affiliate marketing success. Get started by connecting your affiliate accounts or generating your first link.</p>
+                    <div class="action-buttons">
+                        <button id="connect-account-btn" class="btn primary"><i class="fas fa-plug"></i> Connect Account</button>
+                        <button id="create-link-btn" class="btn secondary"><i class="fas fa-link"></i> Create Link</button>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Active Links</h3>
+                        <p class="stat-number">0</p>
+                        <p class="stat-change positive">+0% from last week</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clicks</h3>
+                        <p class="stat-number">0</p>
+                        <p class="stat-change positive">+0% from last week</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Conversions</h3>
+                        <p class="stat-number">0</p>
+                        <p class="stat-change neutral">0% from last week</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Earnings</h3>
+                        <p class="stat-number">$0.00</p>
+                        <p class="stat-change neutral">+0% from last week</p>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-grid">
+                        <div class="action-item" id="find-products">
+                            <i class="fas fa-search"></i>
+                            <span>Find Products</span>
+                        </div>
+                        <div class="action-item" id="generate-link">
+                            <i class="fas fa-link"></i>
+                            <span>Generate Link</span>
+                        </div>
+                        <div class="action-item" id="share-link">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Share Link</span>
+                        </div>
+                        <div class="action-item" id="view-analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Analytics</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Tab -->
+            <section id="products" class="tab-content">
+                <div class="section-header">
+                    <h2>Product Discovery</h2>
+                    <div class="search-container">
+                        <input type="text" id="product-search" placeholder="Search for products...">
+                        <button class="btn primary"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+
+                <div class="network-filter">
+                    <span>Filter by Network:</span>
+                    <div class="network-options">
+                        <label class="network-option">
+                            <input type="checkbox" name="network" value="amazon" checked>
+                            <span>Amazon</span>
+                        </label>
+                        <label class="network-option">
+                            <input type="checkbox" name="network" value="awin" checked>
+                            <span>Awin</span>
+                        </label>
+                        <label class="network-option">
+                            <input type="checkbox" name="network" value="cj" checked>
+                            <span>CJ</span>
+                        </label>
+                        <label class="network-option">
+                            <input type="checkbox" name="network" value="clickbank" checked>
+                            <span>ClickBank</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="product-grid">
+                    <!-- Product cards will be dynamically added here -->
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Search for products to promote or connect your affiliate accounts to see recommendations</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Links Tab -->
+            <section id="links" class="tab-content">
+                <div class="section-header">
+                    <h2>My Affiliate Links</h2>
+                    <button class="btn primary" id="new-link-btn"><i class="fas fa-plus"></i> New Link</button>
+                </div>
+
+                <div class="links-table-container">
+                    <table class="links-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Network</th>
+                                <th>Original URL</th>
+                                <th>Affiliate Link</th>
+                                <th>Clicks</th>
+                                <th>Conversions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Links will be dynamically added here -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state">
+                        <i class="fas fa-link"></i>
+                        <p>You haven't created any affiliate links yet</p>
+                        <button class="btn secondary" id="create-first-link">Create Your First Link</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Tab -->
+            <section id="analytics" class="tab-content">
+                <div class="section-header">
+                    <h2>Performance Analytics</h2>
+                    <div class="date-filter">
+                        <select id="date-range">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="365">Last year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Performance Overview</h3>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Connect your accounts to see performance data</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Top Performing Links</h3>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>Create links to see performance data</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Network Comparison</h3>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-pie"></i>
+                                <p>Connect multiple networks to see comparison</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Conversion Rates</h3>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-percentage"></i>
+                                <p>Generate traffic to see conversion rates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings" class="tab-content">
+                <div class="section-header">
+                    <h2>Account Settings</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Affiliate Networks</h3>
+                        <div class="network-connections">
+                            <div class="network-connection">
+                                <div class="network-info">
+                                    <i class="fab fa-amazon"></i>
+                                    <span>Amazon Associates</span>
+                                </div>
+                                <button class="btn secondary connect-btn" data-network="amazon">Connect</button>
+                            </div>
+                            <div class="network-connection">
+                                <div class="network-info">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>Awin</span>
+                                </div>
+                                <button class="btn secondary connect-btn" data-network="awin">Connect</button>
+                            </div>
+                            <div class="network-connection">
+                                <div class="network-info">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Commission Junction</span>
+                                </div>
+                                <button class="btn secondary connect-btn" data-network="cj">Connect</button>
+                            </div>
+                            <div class="network-connection">
+                                <div class="network-info">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>ClickBank</span>
+                                </div>
+                                <button class="btn secondary connect-btn" data-network="clickbank">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Default Settings</h3>
+                        <form id="default-settings-form">
+                            <div class="form-group">
+                                <label for="default-network">Default Network</label>
+                                <select id="default-network">
+                                    <option value="amazon">Amazon Associates</option>
+                                    <option value="awin">Awin</option>
+                                    <option value="cj">Commission Junction</option>
+                                    <option value="clickbank">ClickBank</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="link-format">Link Format</label>
+                                <select id="link-format">
+                                    <option value="original">Original</option>
+                                    <option value="shortened">Shortened</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn primary">Save Settings</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>User Profile</h3>
+                        <form id="user-profile-form">
+                            <div class="form-group">
+                                <label for="user-name">Name</label>
+                                <input type="text" id="user-name" placeholder="Your Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="user-email">Email</label>
+                                <input type="email" id="user-email" placeholder="your@email.com">
+                            </div>
+                            <button type="submit" class="btn primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Subscription</h3>
+                        <div class="subscription-info">
+                            <p>Current Plan: <span class="plan-badge free">Free</span></p>
+                            <p>Links: <span>0/25 used</span></p>
+                            <button class="btn primary upgrade-btn">Upgrade to Premium</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="connect-account-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Connect Affiliate Account</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="network-selector">
+                    <div class="network-option" data-network="amazon">
+                        <i class="fab fa-amazon"></i>
+                        <span>Amazon Associates</span>
+                    </div>
+                    <div class="network-option" data-network="awin">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Awin</span>
+                    </div>
+                    <div class="network-option" data-network="cj">
+                        <i class="fas fa-tag"></i>
+                        <span>Commission Junction</span>
+                    </div>
+                    <div class="network-option" data-network="clickbank">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>ClickBank</span>
+                    </div>
+                </div>
+                <form id="connect-account-form">
+                    <div class="form-group">
+                        <label for="affiliate-id">Affiliate ID/Tracking ID</label>
+                        <input type="text" id="affiliate-id" placeholder="Your affiliate ID">
+                    </div>
+                    <div class="form-group amazon-fields">
+                        <label for="amazon-tag">Amazon Associate Tag</label>
+                        <input type="text" id="amazon-tag" placeholder="yourtag-20">
+                    </div>
+                    <div class="form-group cj-fields">
+                        <label for="cj-website-id">CJ Website ID</label>
+                        <input type="text" id="cj-website-id" placeholder="Your CJ Website ID">
+                    </div>
+                    <button type="submit" class="btn primary">Connect Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="create-link-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Affiliate Link</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="create-link-form">
+                    <div class="form-group">
+                        <label for="product-url">Product URL</label>
+                        <input type="url" id="product-url" placeholder="https://www.example.com/product">
+                    </div>
+                    <div class="form-group">
+                        <label for="network-select">Affiliate Network</label>
+                        <select id="network-select">
+                            <option value="amazon">Amazon Associates</option>
+                            <option value="awin">Awin</option>
+                            <option value="cj">Commission Junction</option>
+                            <option value="clickbank">ClickBank</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-name">Product Name (Optional)</label>
+                        <input type="text" id="product-name" placeholder="Product Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-name">Campaign (Optional)</label>
+                        <input type="text" id="campaign-name" placeholder="Campaign Name">
+                    </div>
+                    <button type="submit" class="btn primary">Generate Link</button>
+                </form>
+                <div class="generated-link-container">
+                    <h3>Your Affiliate Link</h3>
+                    <div class="link-display">
+                        <input type="text" id="generated-link" readonly>
+                        <button class="btn secondary copy-link-btn"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="share-options">
+                        <button class="share-btn" data-platform="facebook"><i class="fab fa-facebook"></i></button>
+                        <button class="share-btn" data-platform="twitter"><i class="fab fa-twitter"></i></button>
+                        <button class="share-btn" data-platform="pinterest"><i class="fab fa-pinterest"></i></button>
+                        <button class="share-btn" data-platform="email"><i class="fas fa-envelope"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="subscription.js"></script>
+</body>
+</html>
